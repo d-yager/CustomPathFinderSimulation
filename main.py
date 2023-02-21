@@ -9,13 +9,13 @@ WIDTH = 640
 HEIGHT = 480
 
 pygame.init()
-window = pygame.display.set_mode((WIDTH, HEIGHT))
-canvas = pygame.Surface((WIDTH, HEIGHT))
 
+canvas = pygame.Surface((WIDTH, HEIGHT))
 canvas.fill((255, 255, 255))
-pygame.display.flip()
+window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Custom Path Finder Simulation")
-window.fill((0, 0, 0))
+window.blit(canvas, (0, 0))
+pygame.display.update()
 
 
 def main():
