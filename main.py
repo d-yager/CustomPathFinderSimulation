@@ -21,6 +21,7 @@ window.fill((0, 0, 0))
 def main():
     print("Custom Path Finder Simulation")
     draw()
+    save_image()
 
 
 def draw():
@@ -48,6 +49,14 @@ def draw():
                 if event.key == pygame.K_x:
                     drawing_mode = False
                     drawing = False
+
+
+def save_image():
+    image_to_save = pygame.Surface(window.get_size(), pygame.SRCALPHA)
+    image_to_save.fill((255, 255, 255, 0))
+    image_to_save.blit(window, (0, 0))
+    image_to_save.set_colorkey((255, 255, 255))
+    pygame.image.save(image_to_save, "map.png")
 
 
 if __name__ == "__main__":
