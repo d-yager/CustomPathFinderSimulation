@@ -6,6 +6,8 @@ import pygame
 import os
 
 BACKGROUND = pygame.image.load("images/background.png")
+global TRACK
+global TRACK_MASK
 
 WIDTH = 640
 HEIGHT = 480
@@ -28,7 +30,7 @@ class PlayerMarker:
         self.rect = self.img.get_rect()
         self.x = x
         self.y = y
-        self.speed = 0.1
+        self.speed = 0.8
         self.moveX = 0
         self.moveY = 0
 
@@ -43,7 +45,6 @@ class PlayerMarker:
         self.moveY = 0
         if up and not down:
             self.moveY = -self.speed
-            print(up)
         if down and not up:
             self.moveY = self.speed
         if right and not left:
@@ -54,6 +55,10 @@ class PlayerMarker:
         self.x += self.moveX
         self.y += self.moveY
 
+    def collide(self, track_walls):
+        blip_hitbox = pygame.mask.from_surface(self.img)
+        collision = track_walls.overlap(blip_hitbox, (int(self.x), (int(self.y))))
+        return collision
 
 
 def main():
@@ -114,9 +119,12 @@ def save_image():
 
 
 def update_display(win, player):
-    track = pygame.image.load("images/map.png").convert()
+    global TRACK
+    global TRACK_MASK
+    TRACK = pygame.image.load("images/map.png")
+    TRACK_MASK = pygame.mask.from_surface(TRACK)
     win.blit(BACKGROUND, (0, 0))
-    win.blit(track, (0, 0))
+    win.blit(TRACK, (0, 0))
     player.draw(win)
 
 
