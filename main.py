@@ -32,7 +32,7 @@ class PlayerMarker:
         self.moveX = 0
         self.moveY = 0
 
-    def movement_check(self, up=False, down=False, left=False, right=False):
+    def move(self, up=False, down=False, left=False, right=False):
         self.moveX = 0
         self.moveY = 0
         if up and not down:
@@ -69,13 +69,13 @@ def main():
                 break
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[pygame.K_w]:
-            player.movement_check(up=True)
+            player.move(up=True)
         if pressed_keys[pygame.K_a]:
-            player.movement_check(left=True)
+            player.move(left=True)
         if pressed_keys[pygame.K_s]:
-            player.movement_check(down=True)
+            player.move(down=True)
         if pressed_keys[pygame.K_d]:
-            player.movement_check(right=True)
+            player.move(right=True)
 
 
 def draw():
