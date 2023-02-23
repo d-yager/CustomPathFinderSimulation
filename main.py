@@ -32,6 +32,12 @@ class PlayerMarker:
         self.moveX = 0
         self.moveY = 0
 
+    def draw(self, win):
+        new_image = self.img
+        new_rect = new_image.get_rect(center=self.img.get_rect(topleft=(self.x, self.y)).center)
+        win.blit(new_image, new_rect.topleft)
+        pygame.display.update()
+
     def move(self, up=False, down=False, left=False, right=False):
         self.moveX = 0
         self.moveY = 0
@@ -48,11 +54,6 @@ class PlayerMarker:
         self.x += self.moveX
         self.y += self.moveY
 
-    def draw(self, win):
-        new_image = self.img
-        new_rect = new_image.get_rect(center=self.img.get_rect(topleft=(self.x, self.y)).center)
-        win.blit(new_image, new_rect.topleft)
-        pygame.display.update()
 
 
 def main():
@@ -113,7 +114,9 @@ def save_image():
 
 
 def update_display(win, player):
+    track = pygame.image.load("images/map.png").convert()
     win.blit(BACKGROUND, (0, 0))
+    win.blit(track, (0, 0))
     player.draw(win)
 
 
