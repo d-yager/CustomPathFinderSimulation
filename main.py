@@ -3,7 +3,6 @@
 # author: David Yager
 
 import pygame
-import os
 
 BACKGROUND = pygame.image.load("images/background.png")
 global TRACK
@@ -73,21 +72,24 @@ def main():
             if event.type == pygame.QUIT:
                 playing = False
                 break
-        pressed_keys = pygame.key.get_pressed()
-        if pressed_keys[pygame.K_w]:
-            player.move(up=True)
-        if pressed_keys[pygame.K_a]:
-            player.move(left=True)
-        if pressed_keys[pygame.K_s]:
-            player.move(down=True)
-        if pressed_keys[pygame.K_d]:
-            player.move(right=True)
+        if player.collide(TRACK_MASK) is not None:
+            del player
+            playing = False
+        else:
+            pressed_keys = pygame.key.get_pressed()
+            if pressed_keys[pygame.K_w]:
+                player.move(up=True)
+            if pressed_keys[pygame.K_a]:
+                player.move(left=True)
+            if pressed_keys[pygame.K_s]:
+                player.move(down=True)
+            if pressed_keys[pygame.K_d]:
+                player.move(right=True)
 
 
 def draw():
     drawing = True
     drawing_mode = False
-    prev_mouse_pos = (0, 0)
     color = (0, 0, 0)
     while drawing:
         for event in pygame.event.get():
