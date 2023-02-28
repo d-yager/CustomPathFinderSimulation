@@ -7,17 +7,21 @@ import pygame
 BACKGROUND = pygame.image.load("images/background.png")
 global TRACK
 global TRACK_MASK
+global FINISH_LINE
 
 WIDTH = 640
 HEIGHT = 480
 
 pygame.init()
 
+FINISH_LINE = pygame.image.load("images/finish_line.png")
+FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64,64))
 canvas = pygame.Surface((WIDTH, HEIGHT))
 canvas.fill((255, 255, 255))
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Custom Path Finder Simulation")
 window.blit(canvas, (0, 0))
+window.blit(FINISH_LINE, (576, 416))
 pygame.display.update()
 
 
@@ -76,18 +80,23 @@ def main():
             del player
             playing = False
         else:
-            pressed_keys = pygame.key.get_pressed()
-            if pressed_keys[pygame.K_w]:
-                player.move(up=True)
-            if pressed_keys[pygame.K_a]:
-                player.move(left=True)
-            if pressed_keys[pygame.K_s]:
-                player.move(down=True)
-            if pressed_keys[pygame.K_d]:
-                player.move(right=True)
+            movement_check(player)
+
+
+def movement_check(blip):
+    pressed_keys = pygame.key.get_pressed()
+    if pressed_keys[pygame.K_w]:
+        blip.move(up=True)
+    if pressed_keys[pygame.K_a]:
+        blip.move(left=True)
+    if pressed_keys[pygame.K_s]:
+        blip.move(down=True)
+    if pressed_keys[pygame.K_d]:
+        blip.move(right=True)
 
 
 def draw():
+    global FINISH_LINE
     drawing = True
     drawing_mode = False
     color = (0, 0, 0)
@@ -105,6 +114,7 @@ def draw():
                     pygame.draw.lines(canvas, color, True, [(current_mouse_pos[0] - 1,
                                                              current_mouse_pos[1] - 1), current_mouse_pos], 8)
                     window.blit(canvas, (0, 0))
+                    window.blit(FINISH_LINE, (576, 416))
                     pygame.display.update()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_x:
@@ -121,11 +131,15 @@ def save_image():
 
 
 def update_display(win, player):
+    global FINISH_LINE
     global TRACK
     global TRACK_MASK
     TRACK = pygame.image.load("images/map.png")
+    FINISH_LINE = pygame.image.load("images/finish_line.png")
+    FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64,64))
     TRACK_MASK = pygame.mask.from_surface(TRACK)
     win.blit(BACKGROUND, (0, 0))
+    win.blit(FINISH_LINE, (576, 416))
     win.blit(TRACK, (0, 0))
     player.draw(win)
 
