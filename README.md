@@ -2,17 +2,23 @@
 ## PART 1
 
 
-#### IDEA: Create a game where a user can draw a course and control a car and reach the finish line.
+#### IDEA: The Game
 
 
-+ Trace the user's cursor so that they can draw a track. Save this as a png file.
-+ Use the png file as a mask for collision.
++ __(DONE)__ Trace the user's cursor so that they can draw a track. Save this as a png file.
++ __(DONE)__ Use the png file as a mask for collision.
++ __(DONE)__ Add spawn points and finish line.
++ __(DONE)__ Add collision to the finish line.
++ Create pre-set tracks and a button to select pre-set tracks.
++ Prepare game for multiplayer (so we can begin part 2)
 
 
 ## PART 2
 
 
-#### IDEA: Create an AI that can learn to race.
+#### IDEA: The AI
 
 
-+ To be continued...
++ Using NEAT (probably), create a neural network that can learn to reach the finish line without hitting any walls.
++ Demonstrate efficient AI training using pre-set maps.
++ More to come...
