@@ -7,33 +7,38 @@ import pygame
 BACKGROUND = pygame.image.load("images/background.png")
 global TRACK
 global TRACK_MASK
-global FINISH_LINE
+FINISH_LINE = pygame.image.load("images/finish_line.png")
+FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64, 64))
+SPAWN_POINT = pygame.image.load("images/spawn_point.png")
+SPAWN_POINT = pygame.transform.scale(SPAWN_POINT, (42, 42))
 
 WIDTH = 640
 HEIGHT = 480
 
 pygame.init()
+pygame.display.set_caption("Custom Path Finder Simulation")
 
-FINISH_LINE = pygame.image.load("images/finish_line.png")
-FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64,64))
+global drawing_surface
+
 canvas = pygame.Surface((WIDTH, HEIGHT))
 canvas.fill((255, 255, 255))
 window = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Custom Path Finder Simulation")
 window.blit(canvas, (0, 0))
 window.blit(FINISH_LINE, (576, 416))
+window.blit(SPAWN_POINT, (0, 0))
 pygame.display.update()
 
 
 class PlayerMarker:
     IMG = pygame.image.load("images/blip.png").convert()
+    IMG = pygame.transform.scale(IMG, (16, 16))
 
     def __init__(self, x, y):
         self.img = self.IMG
         self.rect = self.img.get_rect()
         self.x = x
         self.y = y
-        self.speed = 0.8
+        self.speed = 1.5
         self.moveX = 0
         self.moveY = 0
 
@@ -96,7 +101,8 @@ def movement_check(blip):
 
 
 def draw():
-    global FINISH_LINE
+    global drawing_surface
+    drawing_surface = pygame.Surface((WIDTH, HEIGHT))
     drawing = True
     drawing_mode = False
     color = (0, 0, 0)
@@ -113,8 +119,10 @@ def draw():
                     current_mouse_pos = pygame.mouse.get_pos()
                     pygame.draw.lines(canvas, color, True, [(current_mouse_pos[0] - 1,
                                                              current_mouse_pos[1] - 1), current_mouse_pos], 8)
-                    window.blit(canvas, (0, 0))
+                    drawing_surface.blit(canvas, (0, 0))
+                    window.blit(drawing_surface, (0, 0))
                     window.blit(FINISH_LINE, (576, 416))
+                    window.blit(SPAWN_POINT, (0, 0))
                     pygame.display.update()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_x:
@@ -123,9 +131,10 @@ def draw():
 
 
 def save_image():
+    global drawing_surface
     image_to_save = pygame.Surface(window.get_size(), pygame.SRCALPHA)
     image_to_save.fill((255, 255, 255, 0))
-    image_to_save.blit(window, (0, 0))
+    image_to_save.blit(drawing_surface, (0, 0))
     image_to_save.set_colorkey((255, 255, 255))
     pygame.image.save(image_to_save, "images/map.png")
 
@@ -136,11 +145,12 @@ def update_display(win, player):
     global TRACK_MASK
     TRACK = pygame.image.load("images/map.png")
     FINISH_LINE = pygame.image.load("images/finish_line.png")
-    FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64,64))
+    FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64, 64))
     TRACK_MASK = pygame.mask.from_surface(TRACK)
     win.blit(BACKGROUND, (0, 0))
     win.blit(FINISH_LINE, (576, 416))
     win.blit(TRACK, (0, 0))
+    win.blit(SPAWN_POINT, (0, 0))
     player.draw(win)
 
 
