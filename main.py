@@ -7,6 +7,8 @@ import pygame
 BACKGROUND = pygame.image.load("images/background.png")
 global TRACK
 global TRACK_MASK
+global FINISH_LINE_MASK
+global DRAWING_SURFACE
 FINISH_LINE = pygame.image.load("images/finish_line.png")
 FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64, 64))
 SPAWN_POINT = pygame.image.load("images/spawn_point.png")
@@ -17,8 +19,6 @@ HEIGHT = 480
 
 pygame.init()
 pygame.display.set_caption("Custom Path Finder Simulation")
-
-global drawing_surface
 
 canvas = pygame.Surface((WIDTH, HEIGHT))
 canvas.fill((255, 255, 255))
@@ -63,9 +63,9 @@ class PlayerMarker:
         self.x += self.moveX
         self.y += self.moveY
 
-    def collide(self, track_walls):
+    def collide(self, collidable_object):
         blip_hitbox = pygame.mask.from_surface(self.img)
-        collision = track_walls.overlap(blip_hitbox, (int(self.x), (int(self.y))))
+        collision = collidable_object.overlap(blip_hitbox, (int(self.x), int(self.y)))
         return collision
 
 
@@ -84,6 +84,9 @@ def main():
         if player.collide(TRACK_MASK) is not None:
             del player
             playing = False
+        if player.collide(FINISH_LINE_MASK) is not None:
+            print("\nYou have won!\n")
+            playing = False
         else:
             movement_check(player)
 
@@ -101,52 +104,58 @@ def movement_check(blip):
 
 
 def draw():
-    global drawing_surface
-    drawing_surface = pygame.Surface((WIDTH, HEIGHT))
+    global DRAWING_SURFACE
+    DRAWING_SURFACE = pygame.Surface((WIDTH, HEIGHT))
     drawing = True
-    drawing_mode = False
+    pen_down = False
     color = (0, 0, 0)
     while drawing:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 drawing = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                drawing_mode = True
+                pen_down = True
             elif event.type == pygame.MOUSEBUTTONUP:
-                drawing_mode = False
+                pen_down = False
             elif event.type == pygame.MOUSEMOTION:
-                if drawing_mode:
+                if pen_down:
                     current_mouse_pos = pygame.mouse.get_pos()
                     pygame.draw.lines(canvas, color, True, [(current_mouse_pos[0] - 1,
                                                              current_mouse_pos[1] - 1), current_mouse_pos], 8)
-                    drawing_surface.blit(canvas, (0, 0))
-                    window.blit(drawing_surface, (0, 0))
+                    DRAWING_SURFACE.blit(canvas, (0, 0))
+                    window.blit(DRAWING_SURFACE, (0, 0))
                     window.blit(FINISH_LINE, (576, 416))
                     window.blit(SPAWN_POINT, (0, 0))
                     pygame.display.update()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_x:
-                    drawing_mode = False
+                    pen_down = False
                     drawing = False
 
 
 def save_image():
-    global drawing_surface
+    global DRAWING_SURFACE
     image_to_save = pygame.Surface(window.get_size(), pygame.SRCALPHA)
     image_to_save.fill((255, 255, 255, 0))
-    image_to_save.blit(drawing_surface, (0, 0))
+    image_to_save.blit(DRAWING_SURFACE, (0, 0))
     image_to_save.set_colorkey((255, 255, 255))
     pygame.image.save(image_to_save, "images/map.png")
 
 
 def update_display(win, player):
     global FINISH_LINE
+    global FINISH_LINE_MASK
     global TRACK
     global TRACK_MASK
     TRACK = pygame.image.load("images/map.png")
     FINISH_LINE = pygame.image.load("images/finish_line.png")
     FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64, 64))
+    finish_line_mask_surface = pygame.Surface((WIDTH, HEIGHT))
+    finish_line_mask_surface.fill((0, 255, 0))
+    finish_line_mask_surface.blit(FINISH_LINE, (576, 416))
+    finish_line_mask_surface.set_colorkey((0, 255, 0))
     TRACK_MASK = pygame.mask.from_surface(TRACK)
+    FINISH_LINE_MASK = pygame.mask.from_surface(finish_line_mask_surface)
     win.blit(BACKGROUND, (0, 0))
     win.blit(FINISH_LINE, (576, 416))
     win.blit(TRACK, (0, 0))
