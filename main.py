@@ -59,6 +59,14 @@ class PlayerMarker:
             self.moveX = self.speed
         if left and not right:
             self.moveX = -self.speed
+        if self.x < 0:
+            self.x = 0
+        if self.x > 623:
+            self.x = 623
+        if self.y < 0:
+            self.y = 0
+        if self.y > 463:
+            self.y = 463
 
         self.x += self.moveX
         self.y += self.moveY
