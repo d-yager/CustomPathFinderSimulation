@@ -9,8 +9,7 @@
 + __(DONE)__ Use the png file as a mask for collision.
 + __(DONE)__ Add spawn points and finish line.
 + __(DONE)__ Add collision to the finish line.
-+ Create pre-set tracks and a button to select pre-set tracks.
-+ Prepare game for multiplayer (so we can begin part 2)
++ __(PUT ON HOLD)__  Create pre-set tracks and a button to select pre-set tracks.
 
 
 ## PART 2
@@ -19,6 +18,6 @@
 #### IDEA: The AI
 
 
-+ Using NEAT (probably), create a neural network that can learn to reach the finish line without hitting any walls.
++ __(IN PROGRESS)__ Using NEAT, create a neural network that can learn to reach the finish line without hitting any walls.
 + Demonstrate efficient AI training using pre-set maps.
 + More to come...
