@@ -3,12 +3,17 @@
 # author: David Yager
 
 import pygame
+import neat
 
 BACKGROUND = pygame.image.load("images/background.png")
 global TRACK
 global TRACK_MASK
+global SELECTED_TRACK
 global FINISH_LINE_MASK
 global DRAWING_SURFACE
+global NO_MAP
+NO_MAP = True
+
 FINISH_LINE = pygame.image.load("images/finish_line.png")
 FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64, 64))
 SPAWN_POINT = pygame.image.load("images/spawn_point.png")
@@ -38,7 +43,7 @@ class PlayerMarker:
         self.rect = self.img.get_rect()
         self.x = x
         self.y = y
-        self.speed = 1.5
+        self.speed = 10
         self.moveX = 0
         self.moveY = 0
 
@@ -77,26 +82,50 @@ class PlayerMarker:
         return collision
 
 
-def main():
+def main(genomes, config):
     print("Custom Path Finder Simulation")
     draw()
     save_image()
-    player = PlayerMarker(12, 12)
+    nets = []
+    ge = []
+    players = []
+    for i, g in genomes:
+        net = neat.nn.FeedForwardNetwork.create(g, config)
+        nets.append(net)
+        players.append(PlayerMarker(12, 12))
+        g.fitness = 0
+        ge.append(g)
+
+    clock = pygame.time.Clock()
+    finish_line_x, finish_line_y = 576, 416
+
     playing = True
     while playing:
-        update_display(window, player)
+        clock.tick(30)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 playing = False
                 break
-        if player.collide(TRACK_MASK) is not None:
-            del player
-            playing = False
-        if player.collide(FINISH_LINE_MASK) is not None:
-            print("\nYou have won!\n")
-            playing = False
-        else:
-            movement_check(player)
+        for i, player in enumerate(players):
+            update_display(window, players)
+            distance_to_finish = ((finish_line_x - player.x)**2 + (finish_line_y - player.y)**2)**0.5
+            output = nets[i].activate((player.x, player.y, finish_line_x, finish_line_y))
+            up, down, left, right = [bool(round(o)) for o in output]
+            player.move(up=up, down=down, left=left, right=right)
+            new_distance_to_finish = ((finish_line_x - player.x) ** 2 + (finish_line_y - player.y) ** 2) ** 0.5
+            genomes[i][1].fitness += distance_to_finish - new_distance_to_finish
+            if player.collide(TRACK_MASK) is not None:
+                genomes[i][1].fitness -= 1
+                print("collide")
+                players.pop(i)
+                nets.pop(i)
+                genomes.pop(i)
+        for i, g in genomes:
+            if player.collide(FINISH_LINE_MASK) is not None:
+                print("\nYou have won!\n")
+                genomes[i][1].fitness += 999
+                # else:
+                #    movement_check(player)
 
 
 def movement_check(blip):
@@ -113,49 +142,55 @@ def movement_check(blip):
 
 def draw():
     global DRAWING_SURFACE
-    DRAWING_SURFACE = pygame.Surface((WIDTH, HEIGHT))
-    drawing = True
-    pen_down = False
-    color = (0, 0, 0)
-    while drawing:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                drawing = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                pen_down = True
-            elif event.type == pygame.MOUSEBUTTONUP:
-                pen_down = False
-            elif event.type == pygame.MOUSEMOTION:
-                if pen_down:
-                    current_mouse_pos = pygame.mouse.get_pos()
-                    pygame.draw.lines(canvas, color, True, [(current_mouse_pos[0] - 1,
-                                                             current_mouse_pos[1] - 1), current_mouse_pos], 8)
-                    DRAWING_SURFACE.blit(canvas, (0, 0))
-                    window.blit(DRAWING_SURFACE, (0, 0))
-                    window.blit(FINISH_LINE, (576, 416))
-                    window.blit(SPAWN_POINT, (0, 0))
-                    pygame.display.update()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_x:
-                    pen_down = False
+    if NO_MAP:
+        DRAWING_SURFACE = pygame.Surface((WIDTH, HEIGHT))
+        drawing = True
+        pen_down = False
+        color = (0, 0, 0)
+        while drawing:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     drawing = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    pen_down = True
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    pen_down = False
+                elif event.type == pygame.MOUSEMOTION:
+                    if pen_down:
+                        current_mouse_pos = pygame.mouse.get_pos()
+                        pygame.draw.lines(canvas, color, True, [(current_mouse_pos[0] - 1,
+                                                                 current_mouse_pos[1] - 1), current_mouse_pos], 8)
+                        DRAWING_SURFACE.blit(canvas, (0, 0))
+                        window.blit(DRAWING_SURFACE, (0, 0))
+                        window.blit(FINISH_LINE, (576, 416))
+                        window.blit(SPAWN_POINT, (0, 0))
+                        pygame.display.update()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_x:
+                        pen_down = False
+                        drawing = False
 
 
 def save_image():
     global DRAWING_SURFACE
-    image_to_save = pygame.Surface(window.get_size(), pygame.SRCALPHA)
-    image_to_save.fill((255, 255, 255, 0))
-    image_to_save.blit(DRAWING_SURFACE, (0, 0))
-    image_to_save.set_colorkey((255, 255, 255))
-    pygame.image.save(image_to_save, "images/map.png")
+    global SELECTED_TRACK
+    global NO_MAP
+    if NO_MAP:
+        image_to_save = pygame.Surface(window.get_size(), pygame.SRCALPHA)
+        image_to_save.fill((255, 255, 255, 0))
+        image_to_save.blit(DRAWING_SURFACE, (0, 0))
+        image_to_save.set_colorkey((255, 255, 255))
+        # input "please name your track" (assign to SELECTED_TRACK)
+        pygame.image.save(image_to_save, "images/map.png")  # save as f'images/{SELECTED_TRACK}.png'
+        NO_MAP = False
 
 
-def update_display(win, player):
+def update_display(win, players):
     global FINISH_LINE
     global FINISH_LINE_MASK
     global TRACK
     global TRACK_MASK
-    TRACK = pygame.image.load("images/map.png")
+    TRACK = pygame.image.load("images/map.png")  # change to "images/selectedmap.png"
     FINISH_LINE = pygame.image.load("images/finish_line.png")
     FINISH_LINE = pygame.transform.scale(FINISH_LINE, (64, 64))
     finish_line_mask_surface = pygame.Surface((WIDTH, HEIGHT))
@@ -168,8 +203,22 @@ def update_display(win, player):
     win.blit(FINISH_LINE, (576, 416))
     win.blit(TRACK, (0, 0))
     win.blit(SPAWN_POINT, (0, 0))
-    player.draw(win)
+    for player in players:
+        player.draw(win)
+
+
+def run(config_path):
+    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet,
+                                neat.DefaultStagnation, config_path)
+
+    population = neat.Population(config)
+    population.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    population.add_reporter(stats)
+
+    winner = population.run(main, 30)
 
 
 if __name__ == "__main__":
-    main()
+    config_file = "config-feedforward.txt"
+    run(config_file)
