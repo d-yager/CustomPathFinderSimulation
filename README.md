@@ -19,5 +19,6 @@
 
 
 + __(IN PROGRESS)__ Using NEAT, create a neural network that can learn to reach the finish line without hitting any walls.
+  + __NOTE__ Currently trying to get the inputs right.
 + Demonstrate efficient AI training using pre-set maps.
 + More to come...
